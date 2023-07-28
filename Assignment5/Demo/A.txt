@@ -1,0 +1,7 @@
+/*
+ *---------------------------
+ * A program which writes structure in the file. Structure should contains information of student.
+ * Author: Sneha Yogesh Choudhari
+ *---------------------------
+ */
+ #
