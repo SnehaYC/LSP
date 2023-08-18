@@ -4,30 +4,74 @@
  *
  */
 
-#include<stdio.h>
-#include<unistd.h>
-#include<fcntl.h>
+#include <signal.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/types.h>
+#include <unistd.h>
 
-#define BLOCKSIZE 512
+void sighup();
+void sigint();
+void sigquit();
 
 int main()
 {
-    int Fd = 0;
-    char Buffer[BLOCKSIZE];
-    char * Path = "/tmp/mypipe";
-
-    Fd = open(Path,O_RDONLY);
-    if(Fd == -1)
-    {
-        printf("Unable to open file.. \n");
+	
+	signal(SIGHUP, sighup);
+    signal(SIGINT, sigint);
+    signal(SIGQUIT, sigquit);
+	int pid = 0;
+	
+	pid = fork();
+	
+	if(pid == -1)
+	{
+		printf("Unable to create the process");
         return -1;
-    }
+	}
+	
+	if(pid == 0) 
+	{
+		 for(;;); 
+	}
+	else 
+	{
+		signal(SIGHUP, SIG_DFL);
+        signal(SIGINT, SIG_DFL);
+        signal(SIGQUIT, SIG_DFL);
 
-    read(Fd,Buffer,sizeof(Buffer));
+		
+		printf("\nPARENT: sending SIGHUP\n\n");
+        kill(pid, SIGHUP);
+        sleep(3); 
+		
+        printf("\nPARENT: sending SIGINT\n\n");
+        kill(pid, SIGINT);
+        sleep(3); 
+		
+        printf("\nPARENT: sending SIGQUIT\n\n");
+        kill(pid, SIGQUIT);
+        sleep(3);
+	}
+	
+	return 0;
+}
 
-    printf("Data from pipe : %s\n",Buffer);
-    
-    close(Fd);
+void sighup()
+{
+    signal(SIGHUP, sighup); 
+    printf("CHILD: I have received a SIGHUP\n");
+}
 
-    return 0;
+void sigint()
+{
+    signal(SIGINT, sigint); 
+    printf("CHILD: I have received a SIGINT\n");
+}
+
+
+void sigquit()
+{
+    printf("Child Process gets stop!!!\n");
+    exit(0);
 }

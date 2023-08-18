@@ -9,32 +9,41 @@
 #include<fcntl.h>
 #include<string.h>
 #include<sys/stat.h>
+#include<sys/types.h>
+#include<stdlib.h>
 
 int main()
-{   
-    int Fd = 0;
-    char * Path = "/tmp/mypipe";
-    char Arr[] = "SnehaYC";
-
-    Fd = mkfifo(Path,0666);
-    if(Fd == -1)
-    {
-        printf("unable to create pipe..\n");
-        return -1;
-    }
-
-    Fd = open(Path,O_WRONLY);
-    if(Fd == -1)
-    {
-        printf("Unable to open pipe...\n");
-        return -1;
-    }
-
-    write(Fd,Arr,strlen(Arr));
-
-    close(Fd);
-
-    unlink(Path);
-
-    return 0;
+{
+	
+	int fd = 0;
+	char buf1[100], buf2[100];
+	
+	char * myfifo = "mypipe";
+	
+	mkfifo(myfifo, 0666);
+	
+	 while (1)
+     {
+		fd = open("mypipe",  O_WRONLY );
+		if(fd == -1)
+		{
+			printf("Unable to open file\n");
+			return -1;
+		}
+	
+		fgets(buf2, 100, stdin);
+	
+		write(fd, buf2, strlen(buf2));
+	
+		close(fd);
+		
+		
+		 fd = open(myfifo, O_RDONLY);
+		 read(fd, buf1, sizeof(buf1));
+		 printf("Client: %s\n", buf1);
+        close(fd);
+	}
+	
+	return 0;
 }
+
